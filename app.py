@@ -12,8 +12,8 @@ import streamlit as st
 
 BASE_DIR = Path(__file__).resolve().parent
 COMPETITORS_DIR = BASE_DIR / "data" / "competitors"
-NEWS_PATH = BASE_DIR / "data" / "news" / "industry_news.json"
-OTERRA_NEWS_PATH = BASE_DIR / "data" / "news" / "oterra_news.json"
+NEWS_DIR = BASE_DIR / "data" / "news"
+NEWS_PATH = NEWS_DIR / "industry_news.json"
 
 DEFAULT_DATA: dict[str, Any] = {
     "company": {
@@ -300,6 +300,10 @@ def load_news_summary(path_text: str) -> str:
     if isinstance(raw, dict) and isinstance(raw.get("output"), dict):
         return _text(raw["output"].get("content")).strip()
     return ""
+
+
+def resolve_company_news_path(competitor_id: str) -> Path:
+    return NEWS_DIR / f"{competitor_id}_news.json"
 
 
 def inject_styles() -> None:
@@ -819,7 +823,7 @@ def render_sidebar(competitors: list[dict[str, str]], news_items: list[dict[str,
 
 def render_detail_view(competitor: dict[str, str]) -> None:
     data = load_json_file(competitor["path"])
-    company_news_items = load_news_items(str(OTERRA_NEWS_PATH)) if competitor["id"].startswith("oterra") else []
+    company_news_items = load_news_items(str(resolve_company_news_path(competitor["id"])))
     render_detail_header(data, f"Loaded from {competitor['path_label']}")
     st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
     render_stats(data)
